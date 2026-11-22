@@ -257,22 +257,24 @@ public class Main {
                             V[(opcode & 0x0F00) >> 8] = (byte) (0x100
                                     - (V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8]));
                         }
-
                         IO.println(decToHex(pc) + ": SUB V" + decToHex((opcode & 0x0F00) >> 8) + ", V"
                                 + decToHex((opcode & 0x00F0) >> 4));
-                        IO.println((V[((opcode & 0x0F00) >> 8)] & 0xFF) + " " + (V[((opcode & 0x00F0) >> 4)] & 0xFF));
                         pc += 2;
                         break;
                     case 0x0006: // 8xy6 - SHR Vx
+                        // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
                         if ((V[(opcode & 0x0F00) >> 8] & 0x0001) == 0x0001) {
                             V[0xF] = 1;
                         } else {
                             V[0xF] = 0;
                         }
-                        IO.println(V[(opcode & 0x0F00) >> 8] + "," + V[0xF]);
-                        V[(opcode & 0x0F00) >> 8] /= 2;
                         IO.println(decToHex(pc) + ": SHR V" + decToHex((opcode & 0x0F00) >> 8) + ", V"
                                 + decToHex((opcode & 0x00F0) >> 4));
+                        pc += 2;
+                        break;
+                    case 0x0007: // 8xy7 - SUBN Vx, Vy
+                        // untested
+                        V[(opcode & 0x0F00) >> 8] = (byte) (V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8]);
                         pc += 2;
                         break;
                     case 0x000E: // 8xyE - SHL Vx
@@ -281,8 +283,6 @@ public class Main {
                         } else {
                             V[0xF] = 0;
                         }
-                        IO.println(V[(opcode & 0x0F00) >> 8] + "," + V[0xF]);
-                        V[(opcode & 0x0F00) >> 8] *= 2;
                         IO.println(decToHex(pc) + ": SHL V" + decToHex((opcode & 0x0F00) >> 8) + ", V"
                                 + decToHex((opcode & 0x00F0) >> 4));
                         pc += 2;
@@ -335,7 +335,9 @@ public class Main {
                         // store binary representation of Vx in I, I+1, I+2
                         memory[I] = (byte) (V[(opcode & 0x0F00) >> 8] / 100);
                         memory[I + 1] = (byte) ((V[(opcode & 0x0F00) >> 8] / 10) % 10);
-                        memory[I + 2] = (byte) ((V[(opcode & 0x0F00) >> 8] % 100) % 10);
+                        memory[I + 2] = (byte) (V[(opcode & 0x0F00) >> 8] % 10);
+                        IO.println(decToHex(pc) + ": LD B, V" + decToHex((opcode & 0x0F00) >> 8));
+                        pc += 2;
                         break;
                     case 0x001E: // Fx1E: ADD I, Vx
                         // untested
@@ -353,6 +355,15 @@ public class Main {
                     case 0x0055: // Fx55: LD [I], Vx
                         memory[I] = V[(opcode & 0x0F00) >> 8];
                         IO.println(decToHex(pc) + ": LD [I], V" + decToHex((opcode & 0x0F00) >> 8));
+                        pc += 2;
+                        break;
+                        case 0x0065: // Fx65: LD Vx, [I]
+                        // untested
+                        // reads memory from V0-Vx into memory starting at I
+                        for (int i = 0; i > (opcode & 0x0F00) >> 8; i++) {
+                            memory[I + i] = V[i];
+                        }
+                        IO.println(decToHex(pc) + ": LD V" + decToHex((opcode & 0x0F00) >> 8) + ", [I]");
                         pc += 2;
                         break;
                     default:
