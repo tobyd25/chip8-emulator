@@ -246,8 +246,10 @@ public class Main {
                         break;
                     case 0x0005: // 8xy5: SUB Vx, Vy
                         IO.println((V[((opcode & 0x0F00) >> 8)] & 0xFF) + " " + (V[((opcode & 0x00F0) >> 4)] & 0xFF));
+                        IO.println(decToHex(pc) + ": SUB V" + decToHex((opcode & 0x0F00) >> 8) + ", V"
+                                + decToHex((opcode & 0x00F0) >> 4));
                         if ((V[((opcode & 0x0F00) >> 8)] & 0xFF) >= (V[((opcode & 0x00F0) >> 4)] & 0xFF)) {
-                            V[0xF] = 1; // carry is set if vx > vy according to tobiasvl guide
+                            V[0xF] = 1;
 
                             // Vx -= Vy
                             V[(opcode & 0x0F00) >> 8] -= (byte) (V[(opcode & 0x00F0) >> 4] & 0xFF);
@@ -257,8 +259,6 @@ public class Main {
                             V[(opcode & 0x0F00) >> 8] = (byte) (0x100
                                     - (V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8]));
                         }
-                        IO.println(decToHex(pc) + ": SUB V" + decToHex((opcode & 0x0F00) >> 8) + ", V"
-                                + decToHex((opcode & 0x00F0) >> 4));
                         pc += 2;
                         break;
                     case 0x0006: // 8xy6 - SHR Vx
@@ -268,13 +268,15 @@ public class Main {
                         } else {
                             V[0xF] = 0;
                         }
-                        IO.println(decToHex(pc) + ": SHR V" + decToHex((opcode & 0x0F00) >> 8) + ", V"
-                                + decToHex((opcode & 0x00F0) >> 4));
+                        V[(opcode & 0x0F00) >> 8] = (byte) (V[(opcode & 0x0F00) >> 8] >>> 1);
+                        IO.println(decToHex(pc) + ": SHR V" + decToHex((opcode & 0x0F00) >> 8));
                         pc += 2;
                         break;
                     case 0x0007: // 8xy7 - SUBN Vx, Vy
                         // untested
                         V[(opcode & 0x0F00) >> 8] = (byte) (V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8]);
+                        IO.println(decToHex(pc) + ": SUBN V" + decToHex((opcode & 0x0F00) >> 8) + ", V"
+                                + decToHex((opcode & 0x00F0) >> 4));
                         pc += 2;
                         break;
                     case 0x000E: // 8xyE - SHL Vx
@@ -283,6 +285,7 @@ public class Main {
                         } else {
                             V[0xF] = 0;
                         }
+                        V[(opcode & 0x0F00) >> 8] = (byte) (V[(opcode & 0x0F00) >> 8] << 1);
                         IO.println(decToHex(pc) + ": SHL V" + decToHex((opcode & 0x0F00) >> 8) + ", V"
                                 + decToHex((opcode & 0x00F0) >> 4));
                         pc += 2;
