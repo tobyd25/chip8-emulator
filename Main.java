@@ -356,15 +356,16 @@ public class Main {
                         pc += 2;
                         break;
                     case 0x0055: // Fx55: LD [I], Vx
-                        memory[I] = V[(opcode & 0x0F00) >> 8];
+                        for (int i = 0; i <= (opcode & 0x0F00) >> 8; i++) {
+                            memory[I + i] = V[i];
+                        }
                         IO.println(decToHex(pc) + ": LD [I], V" + decToHex((opcode & 0x0F00) >> 8));
                         pc += 2;
                         break;
-                        case 0x0065: // Fx65: LD Vx, [I]
-                        // untested
+                    case 0x0065: // Fx65: LD Vx, [I]
                         // reads memory from V0-Vx into memory starting at I
-                        for (int i = 0; i > (opcode & 0x0F00) >> 8; i++) {
-                            memory[I + i] = V[i];
+                        for (int i = 0; i <= (opcode & 0x0F00) >> 8; i++) {
+                            V[i] = memory[I + i];
                         }
                         IO.println(decToHex(pc) + ": LD V" + decToHex((opcode & 0x0F00) >> 8) + ", [I]");
                         pc += 2;
